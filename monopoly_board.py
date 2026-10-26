@@ -7,6 +7,75 @@ Making the board, dice and player movement.
 import random
 import time
 
+
+def open_menu() -> list[str]:
+    """
+    _summary_
+
+    It is used at the start to generate the list of icons and player count
+    ----------
+    input_position : list[int]
+        _description_
+
+    Returns
+    -------
+    list[str]
+        _description_
+
+    Askes how many playeres there will be, then asks what icons they want
+    """
+    print("""
+
+
+Big Cool Monopoly Logo
+
+
+""")
+    question: int = 0
+    players: str
+    num_players: int = 0
+    character_pieces: list[str] = ["!","@","#","$","%","&","*","+","="]
+    final_icons: list[str] = []
+    choice: str
+    n: int = 0
+    i: int = 0
+    while question != 5:
+        question += 1
+        if question == 1:
+            players = input("\nHow many players are playing?\n>")
+            if players == "2":
+                num_players = 2
+            elif players == "3":
+                num_players = 3
+            elif players == "4":
+                num_players = 4
+            else:
+                question -= 1
+                print("\nNot valid answer")
+        if question == 2:
+            while len(final_icons) < num_players:
+                n += 1
+                print(f"\n\n   {character_pieces[0]}   {character_pieces[1]}" +
+                      f"   {character_pieces[2]}   {character_pieces[3]}  " +
+                      f" {character_pieces[4]}   {character_pieces[5]} " +
+                    f"  {character_pieces[6]}   {character_pieces[7]}   {character_pieces[8]}")
+                for i in range(1, 10 - len(final_icons)):
+                    print(f"   {i}", end = "")
+                choice = input(f"\n\nWhat icon does player {n} want?\n>")
+                if choice.isdigit() is True:
+                    choice_num = int(choice)
+                    if choice_num < 10 - len(final_icons) and choice_num != 0:
+                        final_icons.append(character_pieces.pop(choice_num - 1))
+                        character_pieces.append(" ")
+                    else:
+                        print("\nNot valid answer")
+                        n -= 1
+                else:
+                    print("\nNot valid answer")
+                    n -= 1
+    return final_icons
+
+
 def roll_dice() -> list[int]:
     """
     _summary_
@@ -41,26 +110,26 @@ def print_dice(roll: int) -> None:
     roll : int
         _description_
     """
-    print("\n+=========+")
+    print("\n\x1b[0;30;47m+=========+\x1b[0m")
     if roll > 3: # Prints if its a 4 5 or 6
-        print("|  0   0  |")
+        print("\x1b[0;30;47m|  0   0  |\x1b[0m")
     elif roll > 1: # Prints if its 3 or a 2
-        print("|      0  |")
+        print("\x1b[0;30;47m|      0  |\x1b[0m")
     else: # Prints if its a 1
-        print("|         |")
+        print("\x1b[0;30;47m|         |\x1b[0m")
     if roll == 6: # Prints if its a 6
-        print("|  0   0  |")
+        print("\x1b[0;30;47m|  0   0  |\x1b[0m")
     elif roll == 2 or roll == 4: # Prints if its a 2 or a 4
-        print("|         |")
+        print("\x1b[0;30;47m|         |\x1b[0m")
     else: # Prints if its a 1 3 or 5
-        print("|    0    |")
+        print("\x1b[0;30;47m|    0    |\x1b[0m")
     if roll > 3: # Prints if its a 4 5 or 6
-        print("|  0   0  |")
+        print("\x1b[0;30;47m|  0   0  |\x1b[0m")
     elif roll > 1: # Prints if its a 3 or a 2
-        print("|  0      |")
+        print("\x1b[0;30;47m|  0      |\x1b[0m")
     else: # Prints if its a 1
-        print("|         |")
-    print("+=========+")
+        print("\x1b[0;30;47m|         |\x1b[0m")
+    print("\x1b[0;30;47m+=========+\x1b[0m")
 
 
 
@@ -87,7 +156,7 @@ def moving_player(player: int, movement: int, positions: list[int],
         _description_
     """
     n: int
-    total_players: int = 4 # How many total players (I want to move this variable later)
+    total_players = len(player_symbols)
     final_positions: list[int] = positions # The final positions of the players after this
     board_position: list[str] = [" "] * 42 # The graphic that'll be shown in each spot in the board
     for n in range(0,movement):
@@ -95,6 +164,7 @@ def moving_player(player: int, movement: int, positions: list[int],
         positions[player] += 1 # Adds one to the position
         if positions[player] == 40: # Checks if they should be looped on the board
             positions[player] = 0
+            #money[player] += 200
         final_symbols: list[str] = player_display(positions, player_symbols, total_players)
         for n in range(0,total_players): #Replaces the player icon on their space on the list
             board_position[positions[n]] = final_symbols[n]
@@ -143,31 +213,90 @@ def print_board(player_spot: list[str]) -> None: # Honestly i'm just saying it p
     """
     n: int = 0
     print("\n" * 50)
-    print("\n+" + "=" *86 + "+")
-    print("|           |" + "      |" * 9 + "           |")
+    print("\n\x1b[5;30;42m+" + "=" *86 + "+\x1b[0m")
+    print("\x1b[5;30;42m|           |" + "      |" * 9 + "           |\x1b[0m")
 
-    print(f"|   {player_spot[20]}       |", end = "")
+    print(f"\x1b[5;30;42m|   {player_spot[20]}       |", end = "")
     for n in range(0,9):
         print(f"  {player_spot[21+n]}   |", end = "")
-    print(f"       {player_spot[30]}   |")
-    print("|           |" + "      |" * 9 + "           |")
-    print("|           |" + "      |" * 9 + "           |")
-    print("+===========+" + "======+" * 9 + "===========|")
-    for n in range(0,8):
-        print("|           |" + " " * 62 + "|           |")
-        print(f"|   {player_spot[19-n]}       |" + " " * 62 + f"|       {player_spot[31+n]}   |")
-        print("|===========+" + " " * 62 + "+===========|")
-    print("|           |" + " " * 62 + "|           |")
-    print(f"|   {player_spot[11]}       |" + " " * 62 + f"|       {player_spot[39]}   |")
-    print("+===========+" + "======+" * 9 + "===========|")
-    print(f"|      | {player_spot[41]}  |" + "      |" * 9 + "           |")
-    print("|      |____|" + "      |" * 9 + "           |")
-    print(f"|   {player_spot[10]}       |", end = "")
+    print(f"       {player_spot[30]}   |\x1b[0m")
+    print("\x1b[5;30;42m|           |" + "      |" * 9 + "           |\x1b[0m")
+    print("\x1b[5;30;42m|           |", end = "")
+    for n in range(1,10):
+        if n == 1 or n == 4 or n == 3:
+            print("\x1b[5;30;41m      \x1b[5;30;42m" + "|", end = "")
+        elif n == 9 or n == 7 or n == 6:
+            print("\x1b[5;30;43m      \x1b[5;30;42m" + "|", end = "")
+        elif n == 8:
+            print("WATER |", end = "")
+        elif n == 5:
+            print(" RAIL |", end = "")
+        elif n == 2:
+            print("  ??  |", end = "")
+        else:
+            print("      |", end = "")
+    print("           |\x1b[0m")
+    print("\x1b[5;30;42m+===========+" + "======+" * 9 + "===========|\x1b[0m")
+    for n in range(0,9):
+        if n < 2 or n == 3:
+            print("\x1b[5;30;42m|         \x1b[6;31;43m\033[1m##\x1b[5;30;42m|" + " " * 62 +
+                  "|\x1b[0;30;47m  \x1b[5;30;42m         |\x1b[0m")
+            print(f"\x1b[5;30;42m|   {player_spot[19-n]}     \x1b[6;31;43m\033[1m##\x1b[5;30;42m|" +
+                  " " * 62 + "|\x1b[0;30;47m  \x1b[5;30;42m" +
+                  f"     {player_spot[31+n]}   |" + "\x1b[0m")
+        elif n == 6 or n == 8:
+            print("\x1b[5;30;42m|         " + "\x1b[0;30;45m" + "  " + "\x1b[5;30;42m" +
+                  "|" + " " * 62 + "\x1b[5;30;42m|", end = "")
+            print("\x1b[0;30;44m  \x1b[5;30;42m         |" + "\x1b[0m")
+            print(f"\x1b[5;30;42m|   {player_spot[19-n]}     " +
+                  "\x1b[0;30;45m" + "  " + "\x1b[5;30;42m" + "|" +
+                  " " * 62 + "|", end = "")
+            print(f"\x1b[0;30;44m  \x1b[5;30;42m     {player_spot[31+n]}   |" + "\x1b[0m")
+        elif n == 5:
+            print("\x1b[5;30;42m|         " + "\x1b[0;30;45m" + "  " + "\x1b[5;30;42m" +
+                  "|" + " " * 62 + "|??         |\x1b[0m")
+            print(f"\x1b[5;30;42m|   {player_spot[19-n]}     " + "\x1b[0;30;45m  \x1b[5;30;42m" +
+                  "|" + " " * 62 + f"|??     {player_spot[31+n]}   |\x1b[0m")
+        elif n == 4:
+            print("\x1b[5;30;42m|         RA|" + " " * 62 + "|RA         |\x1b[0m")
+            print(f"\x1b[5;30;42m|   {player_spot[19-n]}     IL|" + " " * 62 +
+                  f"|IL     {player_spot[31+n]}   |\x1b[0m")
+        elif n == 2:
+            print("\x1b[5;30;42m|         CH|" + " " * 62 + "|CH         |\x1b[0m")
+            print(f"\x1b[5;30;42m|   {player_spot[19-n]}     ST|" + " " * 62 +
+                  f"|ST     {player_spot[31+n]}   |\x1b[0m")
+        elif n == 7:
+            print("\x1b[5;30;42m|         EL|" + " " * 62 + "|TA         |\x1b[0m")
+            print(f"\x1b[5;30;42m|   {player_spot[19-n]}     EC|" + " " * 62 +
+                  f"|X      {player_spot[31+n]}   |\x1b[0m")
+        if n != 8:
+            print("\x1b[5;30;42m|===========+" + " " * 62 + "+===========|\x1b[0m")
+        else:
+            print("\x1b[5;30;42m+===========+" + "======+" * 9 + "===========|\x1b[0m")
+    print(f"\x1b[5;30;42m|      | {player_spot[41]}  |", end = "")
+    for n in range(1,10):
+        if n < 3 or n == 4:
+            print("\x1b[5;30;46m      \x1b[5;30;42m" + "|", end = "")
+        elif n == 9 or n == 7:
+            print("\x1b[5;30;40m      \x1b[5;30;42m" + "|", end = "")
+        elif n == 8:
+            print("CHEST |", end = "")
+        elif n == 6:
+            print(" TAX  |", end = "")
+        elif n == 5:
+            print(" RAIL |", end = "")
+        elif n == 3:
+            print("  ??  |", end = "")
+        else:
+            print("      |", end = "")
+    print("           |\x1b[0m")
+    print("\x1b[5;30;42m|      |____|" + "      |" * 9 + "   GO      |\x1b[0m")
+    print(f"\x1b[5;30;42m|   {player_spot[10]}       |", end = "")
     for n in range(0,9):
         print(f"  {player_spot[9-n]}   |", end = "")
-    print(f"       {player_spot[0]}   |")
-    print("|           |" + "      |" * 9 + "           |")
-    print("+" + "=" *86 + "+")
+    print(f"       {player_spot[0]}   |\x1b[0m")
+    print("\x1b[5;30;42m|           |" + "      |" * 9 + "           |\x1b[0m")
+    print("\x1b[5;30;42m+" + "=" *86 + "+\x1b[0m")
 
 def main() -> None:
     """
@@ -175,13 +304,14 @@ def main() -> None:
     """
     player_positions: list[int] = [0, 0, 0, 0] # Used for each player in the list how far they are
     jail_timer: list[int] = [0, 0, 0, 0] # To see how many turns they've been in jail
-    players_choice_symbol: list[str] = ["&", "$", "#", "@"] # Their player icon
+    players_choice_symbol: list[str] = open_menu() # Their player icon
+    player_count: int = len(players_choice_symbol)
     players_turn: int = -1 # cycles from 0 to 3, starts at -1 because it keeps getting +1
     rolls: list[int] # A list of both rolls given from roll_dice()
     doubles: int = 1 # used to count the doubles of rolling
     while True:
         players_turn += 1 # increment the turn
-        if players_turn == 4: # loops the cycle
+        if players_turn == player_count: # loops the cycle
             players_turn = 0
         if jail_timer[players_turn] == 3:
             player_positions[players_turn] = 10
@@ -195,7 +325,7 @@ def main() -> None:
                 if rolls[0] == rolls[1]: #Check if double
                     player_positions[players_turn] = 10
                     player_positions = moving_player(players_turn, rolls[0] + rolls[1],
-                                                     player_positions, players_choice_symbol)
+                                          player_positions, players_choice_symbol)
                     #landing_thing()
             elif action == "2": # If you pick option 2
                 #money_var -= 50
@@ -225,7 +355,7 @@ def main() -> None:
                         player_positions[players_turn] = 41 # Sets them in jail
                         break
                     player_positions = moving_player(players_turn, rolls[0] + rolls[1],
-                                                    player_positions, players_choice_symbol)
+                                         player_positions, players_choice_symbol)
                     #landing_thing()
             elif action == "2": # If you pick option 2
                 #buy_house()

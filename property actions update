@@ -1,0 +1,301 @@
+import random
+
+players = [
+    {
+        "name": "Player 1",
+        "money": 1500,
+        "position": 0,
+        "properties": []
+    },
+    {
+        "name": "Player 2",
+        "money": 1500,
+        "position": 0,
+        "properties": []
+    }
+]
+
+def offer_purchase(player, space):
+
+    print(f"You landed on {space['name']}!")
+    print(f"Purchase price: ${space['price']}")
+    
+    choice = input("Would you like to buy this property? (Yes/No): ")
+    
+    if choice.title() == "Yes": # If player choses the buy the property
+    
+        if player["money"] >= space["price"]: # If player's bankroll is more than the cost of the property
+    
+            player["money"] -= space["price"] # Cost of property is deducted from player's bankroll
+            space["owner"] = player["name"] # Transfers ownership to player after purchase
+            player["properties"].append(space)
+    
+            print(f"You purchased {space['name']}!")
+            print(f"Balance: ${player['money']}")
+                
+        else: # If you can't afford the property
+            print("You do not have sufficient funds!")
+
+            raise_money(player, space["price"]) # Raising money to purchase property
+
+            if player["money"] >= space["price"]: # If player has raised enough funds to now purchase property
+                    choice = input("You now have sufficient funds! Buy property? (Yes/No): ")
+            
+                    if choice.title() == "Yes":
+
+                        player["money"] -= space["price"] # Cost of property is deducted from player's bankroll
+                        space["owner"] = player["name"] # Player is now owner of the property
+                        player["properties"].append(space)
+
+                        print(f"You purchased {space['name']}!")
+                        print(f"Balance: ${player['money']}")
+
+def raise_money(player, amount_needed): # Raising money to purchase purchase properties
+    while player["money"] < amount_needed: # While player's bankroll doesn't match the amount needed for the purchase
+
+        print("\nHow would you like to raise funds?")
+        print("1. Mortgage Properties")
+        print("2. Sell Houses and Hotels")
+        print("3. Done")
+
+        choice = input("> ")
+
+        if choice == "1": # Raise money through mortgaging
+            mortgage_property(player)
+
+        elif choice == "2": # Raise money through selling houses
+            sell_house(player)
+
+        elif choice == "3": # Leaving while loop
+            break
+
+def pay_player(payer, receiver, amount):
+
+    if player["money"] < amount:
+
+        print(f"{payer['name']} cannot afford ${amount}!")
+
+        raise_money(payer, amount)
+
+        if payer["money"] < amount:
+            print(f"{payer['name']} is bankrupt!")
+            return False
+
+    payer["money"] -= amount
+    receiver["money"] += amount
+
+    return True
+
+def bankrupt(player, creditor=None):
+
+    print(f"{player['name']} is bankrupt")
+
+    if creditor is not None:
+
+        for property in player["properties"]:
+            property["owner"] = creditor["name"]
+
+        creditor["properties"].extend(
+            player["properties"]
+        )
+
+def find_owner(owner_name):
+    for player in players:
+        if player["name"] == owner_name:
+            return player
+    return None
+
+def draw_card(player, deck):
+
+    card = random.choice(deck)
+
+    print(card["text"])
+
+    if "money" in card:
+        player["money"] += card["money"]
+        print(f"Balance: ${player['money']}")
+    
+    if "position" in card:
+        player["position"] = card["position"]
+
+def count_railroads(owner, board): # Tracks 
+    count = 0
+
+    for space in board:
+        if (
+            space["type"] == "railroad" and space["owner"] == owner
+        ):
+            count += 1
+
+    return count
+
+def count_utilities(owner, board):
+    count = 0
+
+    for space in board:
+        if (
+            space["type"] == "utility" and space["owner"] == owner
+        ):
+            count += 1
+
+    return count
+
+######
+
+if space["type"] == "property": # See's if space is a colored property
+
+    if space["owner"] is None: # See's if space has no owner
+        offer_purchase(player, space) # Offer Purchase definition runs
+
+    elif space["owner"] == player["name"]: # Checks if player already owns the colored property
+
+        print(f"You already own {space['name']}. "
+              "Go inside and take a load off!"
+        )
+
+    else:
+        owner = find_owner(space["owner"])
+
+        rent_due = space["rent"][space["houses"]] # Pays rent to player with or without houses
+
+        print(
+            f"You owe ${rent_due} in rent to "
+            f"{space['owner']}!"
+        )
+
+        if player["money"] < rent_due:
+
+            print("You do not have enough money!")
+
+            raise_money(player, rent_due)
+
+            if player["money"] < rent_due:
+
+                bankrupt(player, owner)
+                return
+
+            else:
+                player["money"] -= rent_due
+                owner["money"] += rent_due
+
+                print(f"Balance: ${player['money']}")
+        else:
+            player["money"] -= rent_due # Rent is subtracted from bankroll
+            owner["money"] += rent_due
+            print(f"Balance: ${player['money']}")
+
+elif space["type"] == "railroad": # Checks if property is a railroad
+
+    if space["owner"] is None: # Activates if no owner
+        offer_purchase(player, space) # Offer Purchase definition runs
+
+    elif space["owner"] == player["name"]:
+        print("You already own this railroad!")
+
+    else:
+        owner = find_owner(space["owner"])
+
+        railroads_owned = count_railroads(
+            space["owner"],
+            board
+        )
+
+        if railroads_owned == 1:
+            rent_due = 25
+        elif railroads_owned == 2:
+            rent_due = 50
+        elif railroads_owned == 3:
+            rent_due = 100
+        else:
+            rent_due = 200 # If a player owns all 4 railroads this will activate
+
+        print(
+            f"You owe ${rent_due} to "
+            f"{space['owner']}!"
+        )
+
+        if player ["money"] < rent_due:
+
+            print("You do not have enough funds!")
+
+            raise_money(player, rent_due)
+
+            if player["money"] < rent_due:
+
+                bankrupt(player, owner)
+
+            else:
+                player["money"] -= rent_due
+                owner["money"] += rent_due
+
+                print(f"Balance: ${player['money']}")
+
+        else:
+            player["money"] -= rent_due
+            owner["money"] += rent_due
+
+            print(f"Balance: ${player['money']}")
+
+elif space["type"] == "utility":
+
+    if space["owner"] is None:
+        offer_purchase(player, space)
+
+    elif space["owner"] == player["name"]:
+        print("You already own this utility")
+    
+    else:
+        owner = find_owner(space["owner"])
+
+        utilities_owned = count_utilities(
+            space["owner"],
+            board
+        )
+
+        if utilities_owned == 1:
+            rent_due = dice_total * 4
+        else:
+            rent_due = dice_total * 10
+
+        owner["money"] += rent_due
+        player["money"] -= rent_due
+        print(f"You owe ${rent_due} to {space['owner']}!")
+        print(f"Balance: ${player['money']}")
+
+elif space["type"] == "chance":
+    draw_card(player, chance_cards)
+
+elif space["type"] == "community_chest":
+    draw_card(player, community_cards)
+
+elif space["type"] == "income_tax":
+
+    tax = player["money"] // 10
+
+    player["money"] -= tax
+
+    print(f"You paid ${tax} in income tax!")
+    print(f"Balance: ${player['money']}")
+
+elif space["type"] == "just_visiting":
+
+    print("Relax, just visiting jail")
+
+elif space["type"] == "go_to_jail":
+
+    print("Go directly to jail!")
+    player["position"] = 41 # 41 is jail's board position
+
+elif space["type"] == "luxury_tax":
+
+    player["money"] -= 75
+    print("You paid $75 for luxury tax!")
+    print(f"Balance: ${player['money']}")
+
+elif space["type"] == "go":
+
+    print("You landed on GO; collect $200!")
+    print(f"Balance: ${player['money']}")
+
+else:
+    print("Take a load off, you're on 'Free Parking'")

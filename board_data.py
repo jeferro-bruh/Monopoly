@@ -6,7 +6,7 @@ Created on  Oct. 17th 2026
 Here I am creating the main data for our board and its respective spots.
 I am using a list of dictionaries with the hope of making calling differnet spots easy.
 
-Update - Oct 23/24th 
+Update - Oct 23/24th
     I am adding the railroad / utility spots to my code to ensure we hit 40 total spots.
 
     I am also making more functions to easily add info to each spot later if needed.
@@ -19,6 +19,10 @@ Update - Oct 23/24th
 
     Finally I added a helper function! This function takes your color input and 
     spits back out the position where they lay. Should be useful.
+
+Update - Oct 29th/30th
+    I am added some extra variables to fulfil the scope of property_actions when I combine it
+    into the copy file 'landing_logic.py'.
 """
 # Importing Any to use in my dictionary that will contain many different types.
 from typing import Any
@@ -28,7 +32,8 @@ def property_func(
         color: str,
         price: int,
         house_cost: int,
-        rent: list[int]) -> dict[str, Any]:
+        rent: list[int]
+        ) -> dict[str, Any]:
     """
     Here I have a function for my property dict to try and make it more organized.
     * keep in mind that rent only goes to 4 houses right now, with no hotel planned yet.
@@ -57,7 +62,9 @@ def property_func(
         'color': color,
         'price': price,
         'house_cost': house_cost,
-        'rent': rent
+        'rent': rent,
+        'owner': None,
+        'houses': 0
     }
 
 def railroad_func(
@@ -85,12 +92,14 @@ def railroad_func(
         'name': name,
         'type': 'railroad',
         'price': price,
-        'rent': rent
+        'rent': rent,
+        'owner': None,
     }
 
 def taxspot_func(
         name: str,
-        tax: int) -> dict[str, Any]:
+        tax: int,
+        spot_type: str) -> dict[str, Any]:
     """
     My taxspot function is for the two spots on the board involving taxes.
 
@@ -100,6 +109,8 @@ def taxspot_func(
         For the specific name of the spot
     tax : int
         The tax to be paid by the lander.
+    spot_type: str
+        spot type helps keep track of what TYPE of taxing we are calculating.
 
     Returns
     -------
@@ -108,7 +119,7 @@ def taxspot_func(
     """
     return {
         'name': name,
-        'type': 'tax',
+        'type': spot_type,
         'amount': tax
     }
 
@@ -137,7 +148,8 @@ def utility_func(
         'name': name,
         'type': 'utility',
         'price': price,
-        'rent': rent
+        'rent': rent,
+        'owner': None,
     }
 
 def gendata_func(
@@ -215,7 +227,7 @@ board_data: list[dict[str, Any]] = [
         60,
         50,
         [4, 20, 60, 180, 320]),
-    taxspot_func('Income Tax', 100), # income tax which i want to be 10% but we will do that later.
+    taxspot_func('Income Tax', 100, 'income_tax'), # no longer use this 100 its calculated in landing
     railroad_func('Reading Railroad', 200, 25), # first railroad name, price, and rent
     property_func(
         'Oriental Ave',
@@ -344,7 +356,7 @@ board_data: list[dict[str, Any]] = [
         350,
         200,
         [35, 175, 500, 1100, 1300]),
-    taxspot_func('Luxury Tax', 75), # second tax is flat rate
+    taxspot_func('Luxury Tax', 75, 'luxury_tax'), # second tax is flat rate
     property_func(
         'Boardwalk',
         'blue',
@@ -355,7 +367,7 @@ board_data: list[dict[str, Any]] = [
 
 # testing code for my keys and spots
 if __name__ == '__main__':
-    # for i, spot in enumerate(board_data):
-    #     print(i, spot['name'])
+    for i, spot in enumerate(board_data):
+        print(i, spot['name'])
 
-    print(color_pos_func('blue')) # testing out the helper function
+    # print(color_pos_func('blue')) # testing out the helper function

@@ -6,9 +6,26 @@ Made Oct. 18th 2026
 Making the playing cards! We will have chance and chest cards here.
 The theme of the cards is pretty simple, usually just moving back or forwards,
 gaining or losing money, or going to jail. I plan on making it a little more fun later.
+
+Heres a fun reference, while making the cards print function I got a wobble card. 
+And since this isnt underwater edition I found out through resource:
+"https://www.w3schools.com/python/ref_func_print.asp"
+
+that you can tell the prints to stop putting spaces in using sep=""
+which fixed the problem.
+
+also making the colors were fun. 
+"https://stackoverflow.com/questions/67241111/python-colored-text-to-the-terminal"
+"https://www.lihaoyi.com/post/BuildyourownCommandLinewithANSIescapecodes.html"
+
+are resources I used to figure this out, as well as picking the color of the
+actual game cards to get an RGB value to assign to these.
+r255, g215, and b0 makes the yellow
+and r230, g81, and b makes 0
+
 """
 
-# These cards have 6 main actions:
+# These cards have 5 main actions:
 # add_money / remove_money - both positive to prevent double negative use to remove set value
 # move_to  / move_backwards - all dictate how you will move once card is drawn
 # go_to_jail - simply puts you in jail position, monopoly_board.py has jail logic
@@ -54,37 +71,172 @@ def draw_card(cards: list[dict[str, Any]]) -> dict[str, Any]:
     cards.append(given) # moves the popped card to the back.
     return given
 
-
 # activate_card function will be my logic for actually using a card.
 def activate_card(
         card: dict[str, Any],
         player: int,
         positions: list[int],
         money: list[int]) -> None:
-    action = card['action']
-    value = card['value']
+    """
+    Activate card function is the logic behind making the cards do work
+
+    Parameters
+    ----------
+    card : dict[str, Any]
+        The referenced card
+    player : int
+        whihc player
+    positions : list[int]
+        where the player is currently
+    money : list[int]
+        how much money the player has
+    """
+    action = card['action'] # links to what its doing
+    value = card['value'] # links to the value of that action
 
 
-    if action == 'add_money':
+    if action == 'add_money': # if action is add money then add money
         money[player] += value
-    elif action == 'remove_money':
+    elif action == 'remove_money':# if action is remove money then remove money
         money[player] -= value
-    elif action == 'go_to_jail':
+    elif action == 'go_to_jail': # if action is go to jail then reposition player
         positions.pop(player)
         positions.insert(player, jail_position)
 
-    elif action == 'move_to':
+    elif action == 'move_to': # moving the player
         if value < positions[player]:
             money[player] += board_data[0]['salary']
         positions[player] = value
 
-    elif action == 'move_backwards':
+    elif action == 'move_backwards': # moving the player backwards spots
         positions[player] = (positions[player] - value) % 40
 
+    else: # check to insure correct input
+        print("Wrong input")
+
+# helper function to break up long text to fit inside the cards
+
+def text_seperator(text: str, size: int) -> list[str]:
+    """
+    Here I am using this helper function to seperate the longer descriptions
+    so they will fit inside the dimensions of the cards.
+
+    Parameters
+    ----------
+    text : str
+        The actual text on the cards.
+    size : int
+        The max length the box needs to be
+
+    Returns
+    -------
+    list[str]
+        returns a list of the strings broken up to use in the main printing func.
+    """
+    lines: list[str] = [] # empty list to start
+    sentence = ''
+    for word in text.split(" "): # for each word in the text split them by white space
+        sizing = (sentence + " " + word).strip() # the size check before added to the line
+        if len(sizing) > size: # checks the max sure the size of the words stays within size
+            lines.append(sentence) # addes the word to lines if it wont be too long
+            sentence = word # keeps track of whats added to ensure length complies
+        else:
+            sentence = sizing # seperates uf size is bigger
+    lines.append(sentence)
+    return lines
+
+# here is a function to print the card out visually when the player draws.
+def print_card(text: str, header: str, color: str) -> None:
+    """
+    Print card function uses text_seperator() helper to print out the two main
+    decks in the game. You have community chest, and the chance.
+
+    Parameters
+    ----------
+    text : str
+        Is the text to be displayed on the card center
+    header : str
+        is the literal word 'chance' or 'chest'
+    color : str
+        references the color you want. I use the following:
+        x1B[30m - black (font)
+        x1B[48;2;255;165;0m - orange (chance)
+        x1B[48;2;255;215;0m - yellow (chest)
+        x1B[0m resets the colors so no bleeding
+
+    """
+    card_width: int = 30 # how wide i want the cards to be
+    new_list = text_seperator(text, card_width -2) # my words seperated in a list
+    # header of the card
+    print(
+        color, # color is a parameter you must input
+        "\x1B[30m"
+        "+",
+        card_width * '=', # setting the borders
+        "+",
+        "\n",
+        "|",
+        header.center(card_width), #.center alligns it to your required dimensions
+        "|",
+        "\n",
+        "+",
+        card_width * '=',
+        "+",
+        "\x1B[0m", # stops the colors (text and background)
+    sep='') # sep makes the print exclude default spaces
+
+    # space before the main text
+    print(
+        color,
+        "\x1B[30m"
+        "|",
+        card_width * ' ',
+        "|",
+        "\n",
+
+        "|",
+        card_width * ' ',
+        "|",
+        "\n"
+
+        "|",
+        card_width * ' ',
+        "|",
+        "\x1B[0m",
+    sep='')
+
+    # middle of the card full of main text
+    for line in new_list: # a for loop to help print out all the words in the list text
+        print(
+            color,
+            "\x1B[30m"
+            "|",
+            line.center(card_width),
+            "|",
+            "\x1B[0m",
+    sep='')
+
+    print(  # bottom of the card after text
+        color,
+        "\x1B[30m"
+        "|",
+        card_width * ' ',
+        "|",
+        "\n",
+
+        "|",
+        card_width * ' ',
+        "|",
+        "\n"
+        "+",
+        card_width * '=',
+        "+",
+        "\x1B[0m",
+    sep='')
 
 
 # The chance cards are here using 'text', 'action' and 'value'
-# I want to add more later but thing this is an okay start.
+# jail position references my board_data for the spot to move to.
 chance_cards: list[dict[str, Any]] = [
     {
         'text': 'Advance to "Go"',
@@ -110,10 +262,6 @@ chance_cards: list[dict[str, Any]] = [
         'text': 'Bank pays you dividend of $50.',
         'action': 'add_money',
         'value': 50},
-    # {
-    #     'text': 'Get out of Jail Free',
-    #     'action': 'leave_jail',
-    #     'value': jail_position},
     {
         'text': 'Go back 3 Spaces',
         'action': 'move_backwards',
@@ -122,7 +270,7 @@ chance_cards: list[dict[str, Any]] = [
         'text': 'Go to Jail',
         'action': 'go_to_jail',
         'value': jail_position},
-    {   # needs a secondary action to check if have hotel ( no hotels yet)
+    { 
         'text': 'Pay repairs on properties. Pay $25 per house',
         'action': 'remove_money',
         'value': 25},
@@ -143,10 +291,6 @@ chest_cards: list[dict[str, Any]] = [
         'text': 'Bank error. Collect $200',
         'action': 'add_money',
         'value': 200},
-    # {
-    #     'text': 'Get out of Jail Free',
-    #     'action': 'leave_jail',
-    #     'value': 10},
     {
         'text': 'Go to Jail',
         'action': 'go_to_jail',
@@ -175,12 +319,5 @@ chest_cards: list[dict[str, Any]] = [
 
 # testing out my functions
 if __name__ == '__main__':
-    positions = [0, 0, 0 ,0]
-    money = [100, 100, 100, 100]
-    shuffle_cards()
-    print(money)
-    print(positions)
-    print(draw_card(chance_cards))
-    activate_card(draw_card(chance_cards), 1, positions, money)
-    print(money)
-    print(positions)
+    print_card(chance_cards[2]['text'], 'CHANCE', '\x1B[48;2;255;165;0m' )
+    print_card(chest_cards[5]['text'], 'COMMUNITY CHEST', '\x1B[48;2;255;215;0m')

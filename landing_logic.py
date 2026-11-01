@@ -4,51 +4,45 @@ landing_logic.py
 Spence
 
 A copy of property_action.py to incorporate board_data variables. I Jethro modified some
+
 of the existing code provided by Spence to use my variables. I deleted some lines as well
 while attempting to fix some of the errors that caused problems.
 """
 
 from typing import Any
 from board_data import jail_position, board_data
-from playing_cards import draw_card, chance_cards, chest_cards, activate_card
+from playing_cards import draw_card, chance_cards, chest_cards, activate_card, print_card
+import time
 
 
 def offer_purchase(player: int, space: dict[str, Any], money:list[int]) -> None: # Function for buying properties and obtaining ownership
 
     print(f"You landed on {space['name']}!")
     print(f"Purchase price: ${space['price']}")
-    
     choice = input("Would you like to buy this property? (Yes/No): ")
-    
     if choice.title() == "Yes": # If player chooses to buy the property
-    
         if money[player] >= space["price"]: # If player has enough money to purchase the property
-    
             money[player] -= space["price"]
             space["owner"] = player
-    
             print(f"You purchased {space['name']}!")
             print(f"Balance: ${money[player]}")
-                
         else: # If player cannot afford the property
             print("You do not have sufficient funds!")
-
             raise_money(player, space["price"], money) # Give player opportunity to raise funds
 
             if money[player] >= space["price"]: # If player has raised enough funds to purchase the property
                 choice = input("You now have sufficient funds! Buy property? (Yes/No): ")
-            
-                if choice.title() == "Yes": # If player chooses to buy the property after raising funds
 
+                if choice.title() == "Yes": # If player chooses to buy the property after raising funds
                     money[player] -= space["price"]
                     space["owner"] = player
-
                     print(f"You purchased {space['name']}!")
                     print(f"Balance: ${money[player]}")
+
 def mortgage_prop(player: int) -> None:
-    print("Work in progress") # still working on this #FIX
+    print("Work in progress") # STUB
 def sell_house(player: int) -> None:
-    print("Work in progress") # still working on this #FIX
+    print("Work in progress") # STUB
 
 def raise_money(player: int, amount_needed: int, money: list[int]) -> None: # Function for raising funds when a player cannot afford a payment
     while money[player] < amount_needed: # Allow player to raise funds until they can afford the payment or chooses to stop
@@ -230,12 +224,14 @@ def landing_thing(player: int, positions: list[int], money: list[int], dice_tota
 
     elif space["type"] == "chance": # Checks if the player landed on a Chance space
         card = draw_card(chance_cards)
-        print(card['text'])
+        print_card(card['text'], 'CHANCE', '\x1B[48;2;255;165;0m') # chance card import
+        time.sleep(1.5) # wait time to let player read
         activate_card(card, player, positions, money)
 
     elif space["type"] == "chest": # Checks if the player landed on a Community Chest space
         card = draw_card(chest_cards)
-        print(card['text'])
+        print_card(card['text'], 'COMMUNITY CHEST', '\x1B[48;2;255;215;0m') # chest card import
+        time.sleep(1.5) # wait time to let player read
         activate_card(card, player, positions, money)
 
     elif space["type"] == "income_tax": # Checks if the player landed on Income Tax
@@ -285,7 +281,7 @@ def landing_thing(player: int, positions: list[int], money: list[int], dice_tota
         print("Not an easy feat around here!")
 
 if __name__ == '__main__':
-    positions = [39, 0]
+    positions = [2, 0]
     money = [100, 100]
     landing_thing(0, positions, money, 7)
     print(money)
